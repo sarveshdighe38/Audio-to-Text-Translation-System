@@ -174,23 +174,23 @@ The convolutional 2layers operates on 2D Mel-spectrograms and learns local time�
 Each convolutional block follows the sequence:
 Conv2D->BatchNorm->ReLU->MaxPooling
 
-i)First Convolutional Block:(1->32 channels) and kernal size(3*3) with padding 1.
+i)First Convolutional Block:(1->32 channels) and kernal size(3,3) with padding 1.
 The input to the first CNN layer is a Mel-spectrogram tensor of shape:(B,1,80,T) 
 where:B->Batch size, 1->no. of channels,80->Mel frequency bins, T-> no. of time frames.
 #Batch Normalization:
 Batch normalization is applied channel-wise to stabilize the distribution of activations during training.
 #ReLU Activation:
 A Rectified Linear Unit (ReLU) non-linearity is applied element-wise:
-#Max Pooling (2*2, Stride 2×1)
-A max-pooling operation with kernel size 2*2 and stride 2*1 is applied:
+#Max Pooling ((2,2), Stride (2,1))
+A max-pooling operation with kernel size (2,2) and stride (2,1) is applied:
 Convolutional Block Structure
 #Output shape:
 (B,32,F/2,T) because we do stride by 2 at freq. domain
 
-ii)Second Convolutional Block(32->64 channels) and kernal size(3*3) with padding 1.
+ii)Second Convolutional Block(32->64 channels) and kernal size(3,3) with padding 1.
 ##Batch Normalization and #ReLU Activation is same as first layer
-#Max Pooling (2*2, Stride 2×1)
-A second max-pooling operation with kernel size 2*2 and stride 2*2 is applied:
+#Max Pooling ((2,2), Stride (2,1))
+A second max-pooling operation with kernel size (2,2) and stride (2,2) is applied:
 #Output shape:
 (B,64,F/2,T/2) because we do stride by 2 at both domain
 
