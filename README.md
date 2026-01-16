@@ -40,6 +40,7 @@ iii)Sampling rate: 16 kHz
 Audio preprocessing plays a crucial role in improving the stability, convergence, and generalization of speech recognition models. In this work, preprocessing is performed at both the waveform level and the feature level, ensuring that the input data is consistent and robust to real-world variability.
 
 4.1) Signal Normalization
+
 Each input audio signal undergoes a sequence of normalization steps before feature extraction.
 
 i)Audio is converted to mono (if multi-channel):
@@ -52,6 +53,7 @@ iii)Amplitude normalization is applied:
 To reduce variations caused by different recording volumes and microphone gains, amplitude normalization is applied.
 
 4.2) Data Augmentation
+
 To improve robustness and generalization, the following augmentations are applied during training only:
 
 i)Speed Perturbation:
@@ -74,29 +76,42 @@ Time masking forces the model to leverage contextual information from surroundin
 
 Feature extraction converts raw speech waveforms into a structured representation that is suitable for neural network–based acoustic modeling. In this work, Mel-spectrogram features are used, as they closely approximate the human auditory perception of sound.
 
-5.1) Time–Frequency Analysis:
+5.1) Time–Frequency Analysis
+
 Speech is a non-stationary signal whose frequency content changes over time. To capture these temporal variations, the input waveform is divided into short overlapping frames, and a Short-Time Fourier Transform (STFT) is applied to each frame, describes how the spectral content of speech evolves over time.
 
-5.2) Mel Filterbank Representation:
+5.2) Mel Filterbank Representation
+
 The linear-frequency spectrum obtained from the STFT is projected onto the Mel scale, which is a perceptual scale designed to mimic the frequency resolution of the human auditory system.The resulting Mel-spectrogram represents the distribution of energy across Mel frequency bands over time.
 
-5.3) Feature Extraction Parameters:
+5.3) Feature Extraction Parameters
+
 The following parameters are used for Mel-spectrogram computation:
+
 i)Number of Mel filters: 80
+
 Provides a detailed yet compact spectral representation suitable for deep learning models.
+
 ii)FFT size: 512
+
 Determines the frequency resolution of the STFT.
-iii)Window length: 400 samples (~25 ms)
+
+iii)Window length: 400 samples (25 ms)
+
 Captures sufficient phonetic information while maintaining temporal locality.
-iv)Hop length: 160 samples (~10 ms)
+
+iv)Hop length: 160 samples (10 ms)
+
 Controls frame overlap and temporal resolution.
 
 These values are commonly used in state-of-the-art ASR systems and represent a balance between time resolution, frequency resolution, and computational efficiency.
 
 5.4) Log-Scaled Spectral Representation:
+
 The Mel-spectrogram implicitly emphasizes lower-energy components that are important for speech perception. This representation is robust to small variations in amplitude and background noise, making it suitable for acoustic modeling.
 
 5.5) Feature Normalization:
+
 To stabilize training and reduce variability across utterances, global mean and variance normalization is applied to each Mel-spectrogram:
 
 X^=X−mu/(sigma+epsilon)
@@ -109,6 +124,7 @@ epsilon is a small constant for numerical stability.
 6. Dataset Pipeline and Data Handling
 
 6.1) ASRDataset Class
+
 The ASRDataset class is responsible for data loading, preprocessing, and augmentation.
 #Audio Loading
 Loads .flac audio files, Converts multi-channel audio to mono, Resamples audio to 16 kHz and Applies amplitude normalization
@@ -125,6 +141,7 @@ Converts transcript text into character-level label indices and Uses a predefine
 The dataset returns-->(MelSpectrogram,LabelSequence)
 
 6.2) Collate Function:
+
 Due to variable-length speech sequences, a custom collate_fn is used to prepare mini-batches.
 Functions of collate_fn:
 #Sorting by Sequence Length
@@ -152,6 +169,7 @@ The proposed ASR model follows a CNN--BiLSTM--CTC architecture.
 It is designed to first extract robust local acoustic features and then model long-range temporal dependencies.
 
 7.1) CNN Feature Extractor:
+
 The convolutional 2layers operates on 2D Mel-spectrograms and learns local time–frequency patterns.
 Each convolutional block follows the sequence:
 Conv2D->BatchNorm->ReLU->MaxPooling
@@ -177,6 +195,7 @@ A second max-pooling operation with kernel size 2*2 and stride 2*2 is applied:
 (B,64,F/2,T/2) because we do stride by 2 at both domain
 
 7.2) Bidirectional LSTM Encoder:
+
 The reshaped CNN features(64*20) are passed to a 2-layer Bidirectional LSTM.
 Hidden size: 256.
 Bidirectional processing captures both past and future context.
@@ -184,6 +203,7 @@ Batch-first configuration is used.
 The BiLSTM effectively models long-term temporal dependencies in speech signals.
 
 7.3) Output Projection Layer
+
 The BiLSTM output is passed through a fully connected linear layer that projects each time step to:
 29 character classes(Zt)
 These include:English letters (a–z)+Space+Apostrophe (')+CTC blank symbol
@@ -202,6 +222,7 @@ The model is trained using CTC Loss, which allows sequence-to-sequence learning 
 CTC marginalizes over all valid alignments between input frames and target labels, enabling end-to-end training.
 
 8.1) Optimization Strategy:
+
 Optimizer: AdamW
 Learning rate: 0.001
 Learning rate scheduler: ReduceLROnPlateau
@@ -211,6 +232,7 @@ Patience:3 //number of consecutive epochs the model is allowed to show no improv
 Factor:0.5 //multiplicative value by which the learning rate is reduced when the monitored metric does not improve.
 
 8.2) Training Monitoring and Loss Visualization
+
 The training dynamics are visualized by plotting the CTC training loss against epochs, which provides insight into convergence behavior and optimization stability of the proposed model.
 
 8.3) Training is done using Google_Colab GPU(T4).
@@ -267,6 +289,7 @@ The integration of data augmentation techniques, including speed perturbation an
 ________________________________________________________________________________________________
 
 #just checked pretrained model
+
 fine-tunes NVIDIA NeMo’s pretrained English Conformer CTC ASR model (stt_en_conformer_ctc_small) on a custom FLAC-based speech dataset with corresponding transcripts.
 
 Workflow:
