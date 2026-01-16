@@ -17,6 +17,7 @@ To improve generalization and robustness, the training pipeline incorporates dat
 
 
 2. Problem Formulation
+
 Given an input speech signal x represented as a sequence of acoustic frames, the objective is to predict the corresponding transcription y which is a sequence of characters:
 
 x->y i.e.(y1,y2,...,yT)
@@ -24,6 +25,7 @@ x->y i.e.(y1,y2,...,yT)
 Since the input speech sequence typically contains a much larger number of acoustic frames than the target transcription, and explicit frame-level alignments between acoustic frames and output characters are not available, the ASR task is formulated as an alignment-free sequence learning problem.
 
 3. Dataset Description
+
 The model is trained on a LibriSpeech dataset consisting of:
 
 i)Audio files in .flac format
@@ -34,6 +36,7 @@ Each transcription file maps an audio file identifier to its textual content.
 iii)Sampling rate: 16 kHz
 
 4. Audio Preprocessing
+
 Audio preprocessing plays a crucial role in improving the stability, convergence, and generalization of speech recognition models. In this work, preprocessing is performed at both the waveform level and the feature level, ensuring that the input data is consistent and robust to real-world variability.
 
 4.1) Signal Normalization
@@ -68,6 +71,7 @@ Missing or corrupted audio segments and Short pauses in speech.
 Time masking forces the model to leverage contextual information from surrounding frames, improving temporal robustness
 
 5. Feature Extraction
+
 Feature extraction converts raw speech waveforms into a structured representation that is suitable for neural network–based acoustic modeling. In this work, Mel-spectrogram features are used, as they closely approximate the human auditory perception of sound.
 
 5.1) Time–Frequency Analysis:
@@ -103,6 +107,7 @@ sigma is the standard deviation,
 epsilon is a small constant for numerical stability.
 
 6. Dataset Pipeline and Data Handling
+
 6.1) ASRDataset Class
 The ASRDataset class is responsible for data loading, preprocessing, and augmentation.
 #Audio Loading
@@ -142,6 +147,7 @@ Output of collate_fn
 Padded Mel-spectrogram tensor-->(B,1,F,Tmax)
 
 7. Model Architecture:
+
 The proposed ASR model follows a CNN--BiLSTM--CTC architecture.
 It is designed to first extract robust local acoustic features and then model long-range temporal dependencies.
 
@@ -191,6 +197,7 @@ At each time step, select the character with the maximum posterior probability:
 C=argmax P(c∣t)
 
 8. Training Objective:
+
 The model is trained using CTC Loss, which allows sequence-to-sequence learning without explicit frame-level alignment.
 CTC marginalizes over all valid alignments between input frames and target labels, enabling end-to-end training.
 
@@ -210,6 +217,7 @@ The training dynamics are visualized by plotting the CTC training loss against e
 
 
 9. cross-Validation Strategy:
+
 To ensure a robust and unbiased evaluation of the proposed speech recognition model, 4-fold cross-validation is employed. This strategy allows the model’s performance to be assessed across multiple data splits, reducing dependence on a single train–validation partition.
 
 The complete dataset is divided into four approximately equal-sized folds, each maintaining a similar distribution of speech samples and transcription lengths. During training, three folds are used for model training, while the remaining fold is reserved exclusively for validation. This process is repeated four times, such that each fold serves as the validation set exactly once.
@@ -222,6 +230,7 @@ Reduced risk of overfitting to a specific split.
 Improved confidence in the stability and generalization capability of the model.
 
 10. Decoding Method
+
 During inference(testing), the model outputs frame-level character probabilities.
 A greedy CTC decoding strategy is applied:
 Select the most probable character at each time step.
@@ -231,6 +240,7 @@ Remove blank tokens.
 This produces the final predicted transcription.
 
 11. Evaluation Metric:
+
 Model performance is evaluated using Word Error Rate (WER):
 WER=(S+D+I)/N
 Where:
